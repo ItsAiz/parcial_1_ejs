@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%-include('./templates/header.ejs')%>
+</head>
+<body>
+    <div class="container">
+        <input type="text" id="searchInput" placeholder="Buscar por título" oninput="searchMovies()" />
+        <input type="text" id="yearInput" placeholder="Filtrar por año de lanzamiento" oninput="filterMoviesByYear()" />
+        <input type="text" id="startDateInput" placeholder="Fecha de inicio" oninput="filterMoviesByDateRange()" />
+        <input type="text" id="endDateInput" placeholder="Fecha de fin" oninput="filterMoviesByDateRange()" />
+        <button id="clearFiltersButton" onclick="clearFilters()">Limpiar filtros</button>
+        <div class="table-responsive">
+          <table class="table table-bordered border-dark" id="moviesTable">
+            <thead class="text-center bg-black">
+              <tr>
+                <td>movie_id</td>
+                <td>title</td>
+                <td>phase</td>
+                <td>category_name</td>
+                <td>release_year</td>
+                <td>running_time</td>
+                <td>rating_name</td>
+                <td>disc_format_name</td>
+                <td>number_discs</td>
+                <td>viewing_format_name</td>
+                <td>aspect_ratio_name</td>
+                <td>status</td>
+                <td>release_date</td>
+                <td>budget</td>
+                <td>gross</td>
+                <th>time_stamp</th>
+                <th>actions</th> 
+              </tr>
+            </thead>
+            <tbody class="text-center" id="moviesBody">
+              <% Object.keys(data).forEach(function(movie) { %>
+              <tr>
+                <td><%= data[movie].movie_id %></td>
+                <td><%= data[movie].title %></td>
+                <td><%= data[movie].phase %></td>
+                <td><%= data[movie].category_name %></td>
+                <td><%= data[movie].release_year %></td>
+                <td><%= data[movie].running_time %></td>
+                <td><%= data[movie].rating_name %></td>
+                <td><%= data[movie].disc_format_name %></td>
+                <td><%= data[movie].number_discs %></td>
+                <td><%= data[movie].viewing_format_name %></td>
+                <td><%= data[movie].aspect_ratio_name %></td>
+                <td><%= data[movie].status %></td>
+                <td><%= data[movie].release_date %></td>
+                <td><%= data[movie].budget %></td>
+                <td><%= data[movie].gross %></td>
+                <td><%= data[movie].time_stamp %></td>
+                <td><button class="btn btn-danger" onclick="deleteMovie(<%= data[movie].movie_id %>)">Eliminar</button></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <script src="js/bootstrap.js"></script>
+      <script>
+        function searchMovies() {
+          var searchInput = document.getElementById("searchInput").value.toLowerCase()
+          var moviesTable = document.getElementById("moviesTable")
+          var moviesBody = document.getElementById("moviesBody")
+          var rows = moviesBody.getElementsByTagName("tr")
+    
+          for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = "none";
+          }
+    
+          for (var i = 0; i < rows.length; i++) {
+            var title = rows[i].getElementsByTagName("td")[1].innerText.toLowerCase()
+            if (title.includes(searchInput)) {
+              rows[i].style.display = "table-row"
+            }
+          }
+      
+          moviesTable.style.display = moviesBody.querySelectorAll("tr[style='display: table-row;']").length > 0 ? "table" : "none"
+        }
+
+        function filterMoviesByYear() {
+            var yearInput = document.getElementById("yearInput").value
+            var moviesTable = document.getElementById("moviesTable")
+            var moviesBody = document.getElementById("moviesBody")
+            var rows = moviesBody.getElementsByTagName("tr")
+
+            for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = "none"
+            }
+
+            for (var i = 0; i < rows.length; i++) {
+            var releaseYear = rows[i].getElementsByTagName("td")[4].innerText;
+            if (releaseYear === yearInput) {
+                rows[i].style.display = "table-row"
+            }
+            }
+
+            moviesTable.style.display = moviesBody.querySelectorAll("tr[style='display: table-row;']").length > 0 ? "table" : "none"
+        }
+
+        function filterMoviesByDateRange() {
+            var startDateInput = document.getElementById("startDateInput").value
+            var endDateInput = document.getElementById("endDateInput").value
+            var moviesTable = document.getElementById("moviesTable")
+            var moviesBody = document.getElementById("moviesBody")
+            var rows = moviesBody.getElementsByTagName("tr")
+
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].style.display = "none"
+            }
+
+            if (startDateInput === "" && endDateInput === "") {
+                for (var i = 0; i < rows.length; i++) {
+                rows[i].style.display = "table-row"
+                }
+            } else {
+                for (var i = 0; i < rows.length; i++) {
+                var releaseDate = rows[i].getElementsByTagName("td")[12].innerText
+                if (isDateInRange(releaseDate, startDateInput, endDateInput)) {
+                    rows[i].style.display = "table-row"
+                }
+                }
+            }
+
+            moviesTable.style.display = moviesBody.querySelectorAll("tr[style='display: table-row;']").length > 0 ? "table" : "none"
+        }
+
+        function isDateInRange(dateString, startDateString, endDateString) {
+            if (!dateString || !startDateString || !endDateString) {
+                return false
+            }
+
+            var date = new Date(dateString)
+            var startDate = new Date(startDateString)
+            var endDate = new Date(endDateString)
+
+            return date >= startDate && date <= endDate
+        }
+
+        function clearFilters() {
+            document.getElementById("searchInput").value = "";
+            document.getElementById("startDateInput").value = "";
+            document.getElementById("endDateInput").value = "";
+
+            var moviesTable = document.getElementById("moviesTable");
+            var moviesBody = document.getElementById("moviesBody");
+            var rows = moviesBody.getElementsByTagName("tr");
+
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].style.display = "table-row";
+            }
+
+            moviesTable.style.display = "table";
+        }
+
+        function deleteMovie(movieId) {
+            fetch(`/delete/${movieId}`, {
+                method: 'delete',
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("La película se eliminó correctamente") 
+                } else {
+                    alert("Error al eliminar la película")
+                }
+                })
+            .catch(error => {
+                    console.error('Error al eliminar la película:', error);
+            })
+        }
+
+
+      </script>
+      
+    
+</body>
+</html>
